@@ -1,0 +1,80 @@
+.char-meter {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--ink-800);
+  border: 1px solid var(--ink-600);
+  border-radius: var(--radius-md);
+}
+
+.char-meter--empty {
+  color: var(--paper-400);
+  font-size: 0.85rem;
+}
+
+.char-meter__ring {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+}
+
+.char-meter__track {
+  fill: none;
+  stroke: var(--ink-600);
+  stroke-width: 5;
+}
+
+.char-meter__fill {
+  fill: none;
+  stroke: var(--signal-green);
+  stroke-width: 5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 160ms ease, stroke 160ms ease;
+}
+
+.char-meter--warning .char-meter__fill {
+  stroke: var(--signal-amber);
+}
+
+.char-meter--over .char-meter__fill {
+  stroke: var(--signal-red);
+}
+
+.char-meter__readout {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-family: var(--font-mono);
+}
+
+.char-meter__count {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--paper-100);
+}
+
+.char-meter--over .char-meter__count {
+  color: var(--signal-red);
+}
+
+.char-meter__limit {
+  font-size: 0.8rem;
+  color: var(--paper-400);
+}
+
+.char-meter__caption {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--paper-400);
+  text-align: right;
+}
+
+.char-meter--over .char-meter__caption {
+  color: var(--signal-red);
+}
+
+.char-meter--warning .char-meter__caption {
+  color: var(--signal-amber);
+}

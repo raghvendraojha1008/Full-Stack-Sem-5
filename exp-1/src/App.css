@@ -1,0 +1,108 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app__masthead {
+  border-bottom: 1px solid var(--ink-700);
+  padding: 18px 32px;
+}
+
+.app__masthead-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.app__logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: conic-gradient(from 210deg, var(--signal-amber), var(--twitter), var(--instagram-a), var(--signal-amber));
+  flex-shrink: 0;
+}
+
+.app__masthead-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--paper-100);
+  letter-spacing: 0.01em;
+}
+
+.app__masthead-subtitle {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--paper-400);
+}
+
+.app__grid {
+  flex: 1;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.app__drafts {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--ink-900);
+  border: 1px solid var(--ink-700);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  position: sticky;
+  top: 24px;
+}
+
+.app__drafts-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.app__drafts-heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--paper-100);
+}
+
+.app__drafts-count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  background: var(--ink-700);
+  color: var(--paper-200);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.app__error {
+  margin: 0;
+  padding: 10px 12px;
+  background: rgba(240, 96, 92, 0.12);
+  border: 1px solid var(--signal-red);
+  border-radius: var(--radius-sm);
+  color: var(--signal-red);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 860px) {
+  .app__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app__drafts {
+    position: static;
+  }
+}

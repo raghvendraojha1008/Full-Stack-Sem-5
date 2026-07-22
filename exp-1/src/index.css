@@ -1,0 +1,73 @@
+:root {
+  /* ---- Color tokens: "Dispatch Desk" — a broadcast control-room palette ---- */
+  --ink-950: #0d1117;
+  --ink-900: #12161f;
+  --ink-800: #1a2030;
+  --ink-700: #242c40;
+  --ink-600: #333d56;
+  --paper-100: #eef1f7;
+  --paper-200: #c7cede;
+  --paper-400: #8891ab;
+
+  --signal-amber: #f2a93b;
+  --signal-amber-dim: #b9812c;
+  --signal-green: #4fd18b;
+  --signal-red: #f0605c;
+
+  --twitter: #4aa3e0;
+  --linkedin: #3c8ec7;
+  --instagram-a: #e1306c;
+  --instagram-b: #f77737;
+
+  /* ---- Type tokens ---- */
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink-950);
+  color: var(--paper-100);
+  font-family: var(--font-body);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--signal-amber);
+  color: var(--ink-950);
+}
+
+/* Focus visibility kept intentionally strong for keyboard users */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--signal-amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

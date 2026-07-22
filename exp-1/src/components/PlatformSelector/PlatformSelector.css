@@ -1,0 +1,72 @@
+.platform-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.platform-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  background: var(--ink-800);
+  border: 1px solid var(--ink-600);
+  border-radius: 999px;
+  color: var(--paper-200);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  transition: border-color 140ms ease, background 140ms ease, transform 100ms ease;
+}
+
+.platform-chip:hover {
+  border-color: var(--platform-accent);
+  transform: translateY(-1px);
+}
+
+.platform-chip__badge {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ink-700);
+  color: var(--paper-400);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.platform-chip__limit {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--paper-400);
+}
+
+.platform-chip--selected {
+  background: var(--ink-700);
+  border-color: var(--platform-accent);
+}
+
+.platform-chip--selected .platform-chip__badge {
+  background: var(--platform-accent);
+  color: var(--ink-950);
+}
+
+.platform-chip--selected .platform-chip__label {
+  color: var(--paper-100);
+}
+
+.platform-chip--warning {
+  border-color: var(--signal-amber);
+}
+
+.platform-chip--error {
+  border-color: var(--signal-red);
+}
+
+.platform-chip--error .platform-chip__badge {
+  background: var(--signal-red);
+  color: var(--ink-950);
+}
