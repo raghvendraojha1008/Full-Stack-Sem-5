@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Post API Console — Experiment 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#10131a;
+    --panel:#171b23;
+    --panel-2:#1d222c;
+    --border:#262c38;
+    --text:#e7e9ee;
+    --text-dim:#8a93a6;
+    --accent:#e3a008;
+    --accent-dim:#8a6a1f;
+    --ok:#34d399;
+    --err:#f87171;
+    --warn:#f0b429;
+    --mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+    --sans: 'Inter', -apple-system, Segoe UI, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  body{min-height:100vh; -webkit-font-smoothing:antialiased;}
+
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; padding:16px 24px; border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+  .brand{display:flex; flex-direction:column; gap:2px;}
+  .brand .title{font-size:17px; font-weight:600; letter-spacing:0.2px;}
+  .brand .subtitle{font-size:12px; color:var(--text-dim); font-family:var(--mono);}
+
+  .conn{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .conn input{
+    background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    font-family:var(--mono); font-size:12px; padding:8px 10px; border-radius:5px; width:230px;
+  }
+  .conn input:focus{outline:1px solid var(--accent); border-color:var(--accent);}
+  button{
+    font-family:var(--sans); font-size:13px; font-weight:500; cursor:pointer;
+    border-radius:5px; border:1px solid var(--border); background:var(--panel-2);
+    color:var(--text); padding:8px 14px; transition:border-color .12s, background .12s;
+  }
+  button:hover{border-color:var(--accent-dim);}
+  button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  button.primary{background:var(--accent); border-color:var(--accent); color:#1a1300; font-weight:600;}
+  button.primary:hover{background:#f0aa14;}
+  button.danger{color:var(--err); border-color:#4a2a2a;}
+  button.danger:hover{border-color:var(--err); background:#241414;}
+  button:disabled{opacity:0.45; cursor:not-allowed;}
+
+  .dot{width:8px; height:8px; border-radius:50%; background:var(--text-dim); flex:none;}
+  .dot.live{background:var(--ok); box-shadow:0 0 0 3px rgba(52,211,153,0.18);}
+  .dot.down{background:var(--err); box-shadow:0 0 0 3px rgba(248,113,113,0.18);}
+  .status-label{font-family:var(--mono); font-size:11px; color:var(--text-dim);}
+
+  main{display:grid; grid-template-columns:1.5fr 1fr; gap:18px; padding:20px 24px 40px; align-items:start;}
+  @media (max-width:920px){ main{grid-template-columns:1fr;} }
+
+  .panel{background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:18px 18px 20px; margin-bottom:18px;}
+  .panel h2{font-size:14px; font-weight:600; margin:0 0 4px;}
+  .panel .hint{font-size:12px; color:var(--text-dim); margin:0 0 14px;}
+
+  label{display:block; font-size:12px; color:var(--text-dim); margin:12px 0 5px;}
+  label:first-of-type{margin-top:0;}
+  input[type=text], textarea, input[type=datetime-local]{
+    width:100%; background:var(--panel-2); border:1px solid var(--border); color:var(--text);
+    font-family:var(--sans); font-size:13px; padding:9px 10px; border-radius:5px; resize:vertical;
+  }
+  input:focus, textarea:focus{outline:none; border-color:var(--accent);}
+  .charcount{font-family:var(--mono); font-size:11px; color:var(--text-dim); text-align:right; margin-top:4px;}
+  .charcount.over{color:var(--err);}
+  .field-error{font-size:12px; color:var(--err); margin-top:5px; font-family:var(--mono); display:none;}
+  .actions-row{display:flex; gap:8px; margin-top:16px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{text-align:left; font-size:11px; color:var(--text-dim); font-weight:500; padding:8px 8px; border-bottom:1px solid var(--border);}
+  td{padding:10px 8px; border-bottom:1px solid var(--border); vertical-align:top;}
+  td.mono, .mono{font-family:var(--mono);}
+  tr:last-child td{border-bottom:none;}
+  .empty-row td{color:var(--text-dim); text-align:center; padding:26px 8px; font-size:13px;}
+  .row-actions{display:flex; gap:6px; flex-wrap:wrap;}
+  .row-actions button{padding:5px 9px; font-size:12px;}
+  .trunc{max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:block;}
+
+  .demo-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .demo-row button{font-size:12px;}
+
+  .log{max-height:640px; overflow-y:auto; padding-right:2px;}
+  .log-entry{border:1px solid var(--border); border-radius:6px; margin-bottom:8px; overflow:hidden; background:var(--panel-2);}
+  .log-head{display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; font-family:var(--mono); font-size:12px;}
+  .log-head:hover{background:#232936;}
+  .badge{font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; flex:none;}
+  .badge.s2{background:rgba(52,211,153,0.14); color:var(--ok);}
+  .badge.s4{background:rgba(240,180,41,0.14); color:var(--warn);}
+  .badge.s5{background:rgba(248,113,113,0.14); color:var(--err);}
+  .method{font-weight:700; flex:none; width:44px;}
+  .path{color:var(--text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .meta{color:var(--text-dim); flex:none; font-size:11px;}
+  .log-body{display:none; padding:10px; border-top:1px solid var(--border);}
+  .log-body.open{display:block;}
+  .log-body pre{margin:0; font-family:var(--mono); font-size:11.5px; white-space:pre-wrap; word-break:break-word; color:var(--text-dim);}
+  .cid{color:var(--accent);}
+  .log-empty{color:var(--text-dim); font-size:12px; padding:14px 4px; font-family:var(--mono);}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="title">Post API Console</div>
+    <div class="subtitle">Experiment 5 — Spring Boot REST API Design &amp; Exception Handling</div>
+  </div>
+  <div class="conn">
+    <span class="dot" id="statusDot"></span>
+    <span class="status-label" id="statusLabel">not connected</span>
+    <input type="text" id="baseUrl" value="http://localhost:8080" spellcheck="false">
+    <button id="connectBtn">Connect</button>
+  </div>
+</header>
+
+<main>
+  <div>
+    <div class="panel">
+      <h2 id="formTitle">Create post</h2>
+      <p class="hint">content is required (up to 280 characters); text and scheduled-at are optional.</p>
+
+      <label for="fContent">Content</label>
+      <textarea id="fContent" rows="3" placeholder="What's the post about?"></textarea>
+      <div class="field-error" id="errContent"></div>
+
+      <label for="fText">Text</label>
+      <input type="text" id="fText" maxlength="500" placeholder="Optional short text">
+      <div class="charcount" id="charcount">0 / 280</div>
+      <div class="field-error" id="errText"></div>
+
+      <label for="fScheduled">Scheduled at</label>
+      <input type="datetime-local" id="fScheduled">
+
+      <div class="actions-row">
+        <button class="primary" id="submitBtn">Create post</button>
+        <button id="cancelEditBtn" style="display:none;">Cancel edit</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Posts</h2>
+      <p class="hint">Fetched from GET /api/posts.</p>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Content</th><th>Text</th><th>Scheduled at</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="postsBody">
+          <tr class="empty-row"><td colspan="5">Connect to load posts.</td></tr>
+        </tbody>
+      </table>
+      <div class="actions-row">
+        <button id="refreshBtn">Refresh posts</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Exception handling demo</h2>
+      <p class="hint">Two one-click calls that exercise the GlobalExceptionHandler, for a quick viva demo.</p>
+      <div class="demo-row">
+        <button id="demoValidation">Send invalid post (expect 400)</button>
+        <button id="demoNotFound">Request unknown post (expect 404)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:0;">
+    <h2>Request log</h2>
+    <p class="hint">Every call this page makes, with status, duration, and the correlation ID from the response header.</p>
+    <div class="log" id="log">
+      <div class="log-empty">No requests yet.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const statusDot = $('statusDot'), statusLabel = $('statusLabel');
+  const baseUrlInput = $('baseUrl'), connectBtn = $('connectBtn');
+  const postsBody = $('postsBody'), logEl = $('log');
+  const fContent = $('fContent'), fText = $('fText'), fScheduled = $('fScheduled');
+  const errContent = $('errContent'), errText = $('errText');
+  const charcount = $('charcount');
+  const submitBtn = $('submitBtn'), cancelEditBtn = $('cancelEditBtn'), formTitle = $('formTitle');
+  const refreshBtn = $('refreshBtn');
+
+  let editingId = null;
+  let logCount = 0;
+
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  fText.addEventListener('input', () => {
+    const n = fText.value.length;
+    charcount.textContent = n + ' / 280';
+    charcount.classList.toggle('over', n > 280);
+  });
+
+  function badgeClass(status){
+    if (status >= 500) return 's5';
+    if (status >= 400) return 's4';
+    return 's2';
+  }
+
+  function addLogEntry(method, path, status, durationMs, correlationId, responseText){
+    if (logCount === 0) logEl.innerHTML = '';
+    logCount++;
+    const id = 'log-' + logCount;
+    const wrap = document.createElement('div');
+    wrap.className = 'log-entry';
+    const statusText = status === 0 ? 'ERR' : status;
+    wrap.innerHTML = `
+      <div class="log-head" data-target="${id}">
+        <span class="method">${esc(method)}</span>
+        <span class="badge ${badgeClass(status)}">${statusText}</span>
+        <span class="path">${esc(path)}</span>
+        <span class="meta">${durationMs}ms</span>
+      </div>
+      <div class="log-body" id="${id}">
+        <div class="mono" style="margin-bottom:6px; font-size:11.5px;">correlation id: <span class="cid">${esc(correlationId || 'n/a')}</span></div>
+        <pre>${esc(responseText)}</pre>
+      </div>`;
+    wrap.querySelector('.log-head').addEventListener('click', () => {
+      wrap.querySelector('.log-body').classList.toggle('open');
+    });
+    logEl.prepend(wrap);
+  }
+
+  async function apiCall(method, path, body){
+    const base = baseUrlInput.value.replace(/\/$/, '');
+    const start = performance.now();
+    let status = 0, correlationId = null, text = '';
+    try {
+      const res = await fetch(base + path, {
+        method,
+        headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+        body: body !== undefined ? JSON.stringify(body) : undefined
+      });
+      status = res.status;
+      correlationId = res.headers.get('X-Correlation-Id');
+      text = await res.text();
+      const duration = Math.round(performance.now() - start);
+      let pretty = text;
+      try { pretty = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+      addLogEntry(method, path, status, duration, correlationId, pretty || '(empty body)');
+      setConnected(true);
+      let json = null;
+      try { json = JSON.parse(text); } catch (e) {}
+      return { ok: res.ok, status, json, raw: text };
+    } catch (err) {
+      const duration = Math.round(performance.now() - start);
+      addLogEntry(method, path, 0, duration, null, 'Network error: ' + err.message +
+        '\n\nCheck that the backend is running and CORS allows this page (see WebConfig).');
+      setConnected(false);
+      return { ok: false, status: 0, json: null, raw: String(err) };
+    }
+  }
+
+  function setConnected(ok){
+    statusDot.className = 'dot ' + (ok ? 'live' : 'down');
+    statusLabel.textContent = ok ? 'connected' : 'not reachable';
+  }
+
+  function fmtDate(iso){
+    if (!iso) return '—';
+    return String(iso).replace('T', ' ').slice(0, 16);
+  }
+
+  function renderPosts(posts){
+    if (!posts || posts.length === 0){
+      postsBody.innerHTML = '<tr class="empty-row"><td colspan="5">No posts yet — create one above.</td></tr>';
+      return;
+    }
+    postsBody.innerHTML = posts.map(p => `
+      <tr>
+        <td class="mono">${p.id}</td>
+        <td><span class="trunc" title="${esc(p.content)}">${esc(p.content)}</span></td>
+        <td><span class="trunc" title="${esc(p.text || '')}">${esc(p.text || '—')}</span></td>
+        <td class="mono">${fmtDate(p.scheduledAt)}</td>
+        <td>
+          <div class="row-actions">
+            <button data-act="edit" data-id="${p.id}">Edit</button>
+            <button data-act="schedule" data-id="${p.id}">Schedule</button>
+            <button class="danger" data-act="delete" data-id="${p.id}">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  async function loadPosts(){
+    const res = await apiCall('GET', '/api/posts');
+    if (res.ok && res.json) renderPosts(res.json.data);
+  }
+
+  function resetForm(){
+    editingId = null;
+    fContent.value = ''; fText.value = ''; fScheduled.value = '';
+    charcount.textContent = '0 / 280'; charcount.classList.remove('over');
+    errContent.style.display = 'none'; errText.style.display = 'none';
+    formTitle.textContent = 'Create post';
+    submitBtn.textContent = 'Create post';
+    cancelEditBtn.style.display = 'none';
+  }
+
+  function toIso(local){
+    return local ? local + ':00' : null;
+  }
+
+  postsBody.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-act]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const act = btn.dataset.act;
+
+    if (act === 'delete'){
+      if (!confirm('Delete post #' + id + '?')) return;
+      const res = await apiCall('DELETE', '/api/posts/' + id);
+      if (res.ok) loadPosts();
+    }
+    if (act === 'edit'){
+      const res = await apiCall('GET', '/api/posts/' + id);
+      if (res.ok && res.json){
+        const p = res.json.data;
+        editingId = p.id;
+        fContent.value = p.content || '';
+        fText.value = p.text || '';
+        fScheduled.value = p.scheduledAt ? p.scheduledAt.slice(0, 16) : '';
+        formTitle.textContent = 'Edit post #' + p.id;
+        submitBtn.textContent = 'Save changes';
+        cancelEditBtn.style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+    if (act === 'schedule'){
+      const when = prompt('Schedule for (YYYY-MM-DDTHH:MM), e.g. 2026-10-01T09:00');
+      if (!when) return;
+      const res = await apiCall('POST', '/api/posts/' + id + '/schedule', { content: '-', scheduledAt: when + ':00' });
+      if (res.ok) loadPosts();
+    }
+  });
+
+  cancelEditBtn.addEventListener('click', resetForm);
+
+  submitBtn.addEventListener('click', async () => {
+    errContent.style.display = 'none'; errText.style.display = 'none';
+    const body = {
+      content: fContent.value,
+      text: fText.value || null,
+      scheduledAt: toIso(fScheduled.value)
+    };
+    const method = editingId ? 'PUT' : 'POST';
+    const path = editingId ? '/api/posts/' + editingId : '/api/posts';
+    const res = await apiCall(method, path, body);
+
+    if (res.ok){
+      resetForm();
+      loadPosts();
+    } else if (res.status === 400 && res.json && res.json.data){
+      const errs = res.json.data;
+      if (errs.content){ errContent.textContent = errs.content; errContent.style.display = 'block'; }
+      if (errs.text){ errText.textContent = errs.text; errText.style.display = 'block'; }
+    }
+  });
+
+  refreshBtn.addEventListener('click', loadPosts);
+  connectBtn.addEventListener('click', loadPosts);
+
+  $('demoValidation').addEventListener('click', () => apiCall('POST', '/api/posts', { content: '' }));
+  $('demoNotFound').addEventListener('click', () => apiCall('GET', '/api/posts/999999'));
+
+  // Try connecting once on load.
+  loadPosts();
+})();
+</script>
+</body>
+</html>
